@@ -11,7 +11,7 @@ import support from "../components/support/support.vue"
 const routes = [
     {
         path: "/",
-        name: "greenlight-go",
+        name: "app",
         component: store.state.display.isMobile ? mLayout : Layout,
         children: [
             {
