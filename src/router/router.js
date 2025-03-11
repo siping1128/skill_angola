@@ -3,15 +3,14 @@ import store from "../store/store";
 import Layout from "../components/Layout/layout.vue"
 import mLayout from "../components/Layout/mLayout.vue"
 import home from "../components/home/home.vue"
-import mission from "../components/mission/mission.vue"
-import development from "../components/development/development.vue"
+import project from "../components/project/project.vue"
+import blog from "../components/blog/blog.vue"
 import about from "../components/about/about.vue"
-import support from "../components/support/support.vue"
 
 const routes = [
     {
         path: "/",
-        name: "app",
+        name: "landing",
         component: store.state.display.isMobile ? mLayout : Layout,
         children: [
             {
@@ -20,19 +19,14 @@ const routes = [
                 component: home
             },
             {
-                path: "design-detail",
-                name: "mission",
-                component: mission
+                path: "project",
+                name: "project",
+                component: project
             },
             {
-                path: "public-support",
-                name: "support",
-                component: support
-            },
-            {
-                path: "development-history",
-                name: "development",
-                component: development
+                path: "blog",
+                name: "blog",
+                component: blog
             },
             {
                 path: "about",
@@ -40,14 +34,13 @@ const routes = [
                 component: about
             }
         ]
-    }
+    },
 ];
 
-// dash
 const router = createRouter({
-    history: createWebHashHistory('/'),
+    history: createWebHashHistory('/skill_angola/'),
     routes,
-  });  
+});
 
 router.afterEach(() => {
     window.scrollTo(0, 0)

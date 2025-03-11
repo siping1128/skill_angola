@@ -6,14 +6,15 @@ import {
 } from 'naive-ui';
 import store from './store/store';
 
+// 这里是用来判断用户是否正在使用移动端设备来访问我们的页面
 store.state.display.isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase());
 
 const themeOverrides = {
   common: {
-    "primaryColor": "#000000",
-    "primaryColorHover": "#000000",
-    "primaryColorPressed": "#000000",
-    "primaryColorSuppl": "#000000",
+    "primaryColor": "#4350FFFF", // 这里可以自定义主题色
+    "primaryColorHover": "#747EFEFF",
+    "primaryColorPressed": "#182084FF",
+    "primaryColorSuppl": "#3B44BEFF",
   },
 };
 </script>
