@@ -45,7 +45,7 @@ const routes = [
 
 // dash
 const router = createRouter({
-    history: createWebHashHistory('/skill_angola/'),
+    history: createWebHashHistory('/'),
     routes,
   });  
 
