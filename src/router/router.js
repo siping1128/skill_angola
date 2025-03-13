@@ -3,9 +3,8 @@ import store from "../store/store";
 import Layout from "../components/Layout/layout.vue"
 import mLayout from "../components/Layout/mLayout.vue"
 import home from "../components/home/home.vue"
-import project from "../components/project/project.vue"
-import blog from "../components/blog/blog.vue"
-import about from "../components/about/about.vue"
+import SignUp from "../components/SignUp/SignUp.vue";
+import SignIn from "../components/SignIn/SignIn.vue";
 
 const routes = [
     {
@@ -19,20 +18,15 @@ const routes = [
                 component: home
             },
             {
-                path: "project",
-                name: "project",
-                component: project
+                path: "sign-up",
+                name: "sign-up",
+                component: SignUp
             },
             {
-                path: "blog",
-                name: "blog",
-                component: blog
+                path: "sign-in",
+                name: "sign-in",
+                component: SignIn
             },
-            {
-                path: "about",
-                name: "about",
-                component: about
-            }
         ]
     },
 ];
