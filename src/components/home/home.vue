@@ -1694,8 +1694,8 @@ function mobileHandleComment(record) {
                 </n-scrollbar>
             </n-flex>
             <div v-else style="padding: 0 40px">
-                <n-data-table max-height="calc(100vh - 24px - 48px - 58px - 39px - 40px)" :columns="applicantColumns"
-                    :data="applicantRecords" bordered :scroll-x="1800" :loading="dataTableloading"></n-data-table>
+                <n-data-table :loading="dataTableLoading" max-height="calc(100vh - 24px - 48px - 58px - 39px - 40px)"
+                    :columns="applicantColumns" :data="applicantRecords" bordered :scroll-x="1800"></n-data-table>
             </div>
         </n-modal>
         <n-modal v-model:show="showApplicantDetailModal" :maskClosable="!loading">
