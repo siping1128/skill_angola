@@ -468,6 +468,8 @@ const companyColumns = computed(() => {
         {
             title: t.value.APP.Company.NDataTable_columns_1,
             key: 'name',
+            fixed: 'left',
+            width: 240,
             render(row) {
                 return h(
                     'div',
@@ -486,7 +488,9 @@ const companyColumns = computed(() => {
         },
         {
             title: t.value.APP.Company.NDataTable_columns_2,
-            key: 'address'
+            key: 'address',
+            fixed: 'left',
+            width: 240,
         },
         {
             title: t.value.APP.Company.NDataTable_columns_3,
@@ -502,6 +506,8 @@ const companyColumns = computed(() => {
         },
         {
             key: t.value.APP.Company.NDataTable_columns_6,
+            fixed: 'right',
+            width: 240,
             render(row) {
                 return h(NFlex, { size: 48 }, {
                     default: () => [
@@ -1156,6 +1162,7 @@ async function copyPhone() {
 }
 
 async function handleUpdateRecord(record, newStatus, newComment) {
+    loading.value = true
     const newData = {}
     if (newStatus != record.status) {
         newData.status = newStatus
@@ -1610,7 +1617,7 @@ function mobileHandleComment(record) {
                                             <n-flex v-if="modalMode == 1" vertical>
                                                 <n-input type="textarea" placeholder="Comment here..." maxlength="2000"
                                                     show-count v-model:value="comment"></n-input>
-                                                <n-button type="primary" secondary
+                                                <n-button type="primary" secondary :loading="loading"
                                                     @click="handleUpdateRecord(record, record.status, comment)">
                                                     {{ t.Applicant.NModal_saveComment }}
                                                 </n-button>
@@ -1688,7 +1695,7 @@ function mobileHandleComment(record) {
                     :data="applicantRecords" bordered :scroll-x="1800"></n-data-table>
             </div>
         </n-modal>
-        <n-modal v-model:show="showApplicantDetailModal">
+        <n-modal v-model:show="showApplicantDetailModal" :maskClosable="!loading">
             <n-card style="width: 800px" :bordered="false" size="huge" role="dialog" aria-modal="true">
                 <template #header>
                     <div style="font-size: 24px">
@@ -1770,9 +1777,9 @@ function mobileHandleComment(record) {
                 </n-grid>
                 <div v-if="commentMode">
                     <n-input type="textarea" placeholder="Comment here..." maxlength="2000" show-count
-                        style="margin-top: 24px" v-model:value="comment"></n-input>
+                        style="margin-top: 24px" v-model:value="comment" :disabled="loading"></n-input>
                     <n-flex :justify="'end'" style="margin-top: 48px">
-                        <n-button type="primary"
+                        <n-button type="primary" :loading="loading"
                             @click="handleUpdateRecord(currentRecord, currentRecord.status, comment)">
                             {{ t.Applicant.NModal_saveComment }}
                         </n-button>
