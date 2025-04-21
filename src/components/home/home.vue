@@ -40,7 +40,7 @@ const renderIcon = (icon) => {
 const t = ref(null);
 
 const loading = ref(false);
-const jobTableLoading = ref(true);
+const dataTableLoading = ref(true);
 const copied = ref(false);
 
 const userUid = ref("")
@@ -813,7 +813,7 @@ function companyGetter(companyUid) {
                     default:
                         currentCompany.value = decryptData(msg.encryptedData)
                         jobs.value = currentCompany.value.jobs
-                        jobTableLoading.value = false;
+                        dataTableLoading.value = false;
                         break;
                 }
                 break;
@@ -913,7 +913,7 @@ function handleCreateOrUpdateCompany(e) {
                                     message.success(t.value.APP.Company.NForm_create_success + currentCompany.value.name)
                                     loading.value = false;
                                     showCompanyModal.value = false;
-                                    jobTableLoading.value = false;
+                                    dataTableLoading.value = false;
                                     break;
                                 case 404:
                                     message.error(t.value.APP.Company.NForm_create_error)
@@ -1124,6 +1124,7 @@ function handleCreateOrUpdateJob(e) {
 
 async function recordGetter(job) {
     loading.value = true;
+    dataTableLoading.value = true
     SkillAngolaService.findAllRecordsByJobId(encryptData(job.id))
         .then(res => {
             if (res.data.code === 201) {
@@ -1132,9 +1133,11 @@ async function recordGetter(job) {
                 message.error("Sorry, we cannot get this job's records at this moment")
             }
             loading.value = false;
+            dataTableLoading.value = false;
         }).catch(err => {
             console.log(err)
             loading.value = false;
+            dataTableLoading.value = false;
         })
 }
 
@@ -1370,7 +1373,7 @@ function mobileHandleComment(record) {
                     </n-layout>
                     <div v-else style="padding: 24px">
                         <n-data-table :min-height="jobTableHeight" :max-height="jobTableHeight" :columns="jobColumns"
-                            :data="jobs" bordered :loading="jobTableLoading" :scroll-x="1200">
+                            :data="jobs" bordered :loading="dataTableLoading" :scroll-x="1200">
                             <template #empty>
                                 <n-result :title="t.APP.Job.Text_NResult_404_title"
                                     :description="t.APP.Job.Text_NResult_404_description">
@@ -1692,7 +1695,7 @@ function mobileHandleComment(record) {
             </n-flex>
             <div v-else style="padding: 0 40px">
                 <n-data-table max-height="calc(100vh - 24px - 48px - 58px - 39px - 40px)" :columns="applicantColumns"
-                    :data="applicantRecords" bordered :scroll-x="1800"></n-data-table>
+                    :data="applicantRecords" bordered :scroll-x="1800" :loading="dataTableloading"></n-data-table>
             </div>
         </n-modal>
         <n-modal v-model:show="showApplicantDetailModal" :maskClosable="!loading">
