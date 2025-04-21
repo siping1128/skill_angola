@@ -6,17 +6,13 @@ import {
 </script>
 
 <template>
-    <n-layout class="container">
+    <n-layout>
         <n-layout-header>
         </n-layout-header>
-        <n-layout-content content-style="padding: 24px;">
+        <n-layout-content>
             <router-view />
         </n-layout-content>
     </n-layout>
 </template>
 
-<style lang='less' scoped>
-.container {
-    min-height: 100vh;
-}
-</style>
+<style lang='less' scoped></style>

@@ -5,6 +5,8 @@ import {
   NMessageProvider
 } from 'naive-ui';
 import store from './store/store';
+import { handleSelectLanguage } from './functions/general';
+import { onBeforeMount } from 'vue';
 
 // 这里是用来判断用户是否正在使用移动端设备来访问我们的页面
 store.state.display.isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase());
@@ -17,6 +19,15 @@ const themeOverrides = {
     "primaryColorSuppl": "#E14C27FF",
   },
 };
+
+onBeforeMount(() => {
+  const curLang = localStorage.getItem("lang")
+  if (!curLang) {
+    handleSelectLanguage("en")
+  } else {
+    handleSelectLanguage(curLang)
+  }
+})
 </script>
 
 <template>

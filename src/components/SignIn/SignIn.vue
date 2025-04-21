@@ -1,35 +1,103 @@
 <script setup>
-import { ref } from 'vue'
+import { onBeforeMount, ref, watch, computed } from 'vue'
 import router from '../../router/router';
+import { languageOptions, handleSelectLanguage } from '../../functions/general';
+import { localUser } from '../../assets/auth';
+import SkillAngolaService from '../../api/SkillAngola.service';
+import store from '../../store/store';
+import { encryptData } from '../../assets/auth';
+import { useMessage } from 'naive-ui'
 
-const languageOptions = [
-    {
-        label: "English",
-        key: "en"
-    },
-    {
-        label: "Português",
-        key: "por"
-    },
-    {
-        label: "简体中文",
-        key: "cn"
+const isMobile = store.state.display.isMobile
+
+const formRef = ref(null);
+
+const loading = ref(false);
+
+const message = useMessage();
+
+const model = ref({
+    username: null,
+    password: null
+});
+
+const t = ref(null);
+
+const rules = computed(() => {
+    return {
+        username: [
+            {
+                required: true,
+                trigger: ["input", "blur"]
+            }
+        ],
+        password: [
+            {
+                required: true
+            }
+        ],
+    };
+})
+
+const readyRender = ref(false);
+
+watch(() => store.state.display.text, newVal => {
+    t.value = newVal
+    readyRender.value = true;
+})
+
+onBeforeMount(() => {
+    t.value = store.state.display.text
+    if (t.value) {
+        readyRender.value = true;
     }
-]
-
-function handleSelectLanguage() {
-    // next class
-}
+})
 
 function handleToSignUpPage() {
     router.push("sign-up")
 }
+
+function login(e) {
+    e.preventDefault();
+    formRef.value?.validate((errors) => {
+        if (!errors) {
+            loading.value = true;
+            const encryptedData_frontend = encryptData(model.value)
+            SkillAngolaService.handleLogin({ encryptedData_frontend }).then(res => {
+                const code = res.data.code
+                switch (code) {
+                    case 201:
+                        message.success(t.value.SignIn.Backend_message_success + model.value.username)
+                        const uid = res.data.encryptedData;
+                        localStorage.setItem("SAToken", uid)
+                        setTimeout(() => {
+                            router.go(0)
+                        }, 500);
+                        break;
+                    case 404:
+                        message.error(t.value.SignIn.Backend_message_error)
+                        loading.value = false
+                        break;
+                    default:
+                        message.error(t.value.SignIn.Backend_message_error)
+                        loading.value = false
+                        break;
+                }
+            }).catch(err => {
+                console.log(err)
+                loading.value = false
+            })
+        } else {
+            message.error(errors)
+        }
+    });
+}
 </script>
 
 <template>
-    <div>
+    <div v-if="readyRender" class="container">
         <n-flex :justify="'end'">
-            <n-dropdown trigger="click" :options="languageOptions" :select="handleSelectLanguage">
+            <n-dropdown trigger="click" :options="languageOptions" @select="handleSelectLanguage">
                 <n-button round :size="'large'">
                     <template #icon>
                         <n-icon :size="24">
@@ -41,7 +109,7 @@ function handleToSignUpPage() {
                             </svg>
                         </n-icon>
                     </template>
-                    <b>Language</b>
+                    <b>{{ t.ButtonText_changeLang }}</b>
                 </n-button>
             </n-dropdown>
         </n-flex>
@@ -49,41 +117,51 @@ function handleToSignUpPage() {
             <n-flex style="height: calc(100vh - 40px - 23px - 48px);" :align="'center'">
                 <n-flex vertical :size="48" style="margin-top: -48px">
                     <div>
-                        <div class="title">Skill Angola™</div>
-                        <div class="subTitle"><n-text :depth="3">Employer Portal</n-text></div>
+                        <div class="title" :style="{ fontSize: isMobile ? '48px' : '64px' }">{{ t.CompanyName }}</div>
+                        <div class="subTitle"><n-text :depth="3">{{ t.SignIn.Title }}</n-text></div>
                     </div>
                     <n-flex vertical>
                         <div>
-                            <n-form label-placement="left">
-                                <n-form-item>
-                                    <n-input :size="'large'" round placeholder="Username"></n-input>
+                            <n-form label-placement="left" ref="formRef" :model="model" :rules="rules">
+                                <n-form-item path="username">
+                                    <n-input :size="'large'" round :placeholder="t.InputPlaceHolder_username"
+                                        v-model:value="model.username" @keydown.enter.prevent></n-input>
                                 </n-form-item>
-                                <n-form-item>
-                                    <n-input type="password" :size="'large'" round placeholder="Password"></n-input>
+                                <n-form-item path="password">
+                                    <n-input type="password" :size="'large'" round
+                                        :placeholder="t.InputPlaceHolder_password" v-model:value="model.password"
+                                        @keydown.enter.prevent></n-input>
                                 </n-form-item>
                             </n-form>
                         </div>
                         <n-flex :justify="'center'">
-                            <n-button :size="'large'" round type="primary" style="width: 100%">Login</n-button>
+                            <n-button :size="'large'" round type="primary" style="width: 100%" @click="login"
+                                :disabled="!model.username || !model.password" :loading="loading">
+                                {{ t.SignIn.ButtonText_Login }}
+                            </n-button>
                         </n-flex>
                     </n-flex>
                 </n-flex>
             </n-flex>
         </n-flex>
-        <n-flex :justify="'center'">
+        <!-- <n-flex :justify="'center'">
             <n-button @click="handleToSignUpPage" text>Don't have an account? &nbsp;<b>Register as an
                     employer</b></n-button>
-        </n-flex>
+        </n-flex> -->
     </div>
 </template>
 
 <style lang='less' scoped>
+.container {
+    padding: 24px;
+}
+
 .FormContainer {
+    max-width: 100%;
     width: 1280px;
     margin: 0 auto;
 
     .title {
-        font-size: 64px;
         text-align: center;
         font-weight: bold;
     }

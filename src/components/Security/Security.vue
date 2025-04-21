@@ -7,56 +7,40 @@ import SkillAngolaService from '../../api/SkillAngola.service';
 import {
     useMessage
 } from 'naive-ui';
-
-const props = defineProps({
-    password: String
-})
-
-const isMobile = store.state.display.isMobile
-
-const formRef = ref(null);
-
-const rPasswordFormItemRef = ref(null);
-
-// const step = ref(1);
+import { decryptData, encryptData } from '../../assets/auth';
+import { logout } from '../../assets/auth';
 
 const message = useMessage();
 
 const readyRender = ref(false);
 
+const formRef = ref(null);
+
+const rPasswordFormItemRef = ref(null);
+
 const model = ref({
-    username: null,
     password: null,
-    repassword: null
+    newPassword: null,
+    reNewPassword: null
 });
 
 const t = ref(null);
 
 const rules = computed(() => {
     return {
-        username: [
-            {
-                required: true,
-                validator(rule, value) {
-                    if (!value) {
-                        return new Error(t.value.SignUp.Step1.NForm_rules_message_username1);
-                    } else if (value.length < 6) {
-                        return new Error(t.value.SignUp.Step1.NForm_rules_message_username2);
-                    } else if (/[^A-Za-z0-9]/.test(value)) {
-                        return new Error(t.value.SignUp.Step1.NForm_rules_message_username3);
-                    }
-                    return true;
-                },
-                trigger: ["blur"]
-            }
-        ],
         password: [
             {
                 required: true,
                 message: () => t.value.SignUp.Step1.NForm_rules_message_password
             }
         ],
-        repassword: [
+        newPassword: [
+            {
+                required: true,
+                message: () => t.value.SignUp.Step1.NForm_rules_message_password
+            }
+        ],
+        reNewPassword: [
             {
                 required: true,
                 message: () => t.value.SignUp.Step1.NForm_rules_message_repassword1,
@@ -82,75 +66,91 @@ watch(() => store.state.display.text, newVal => {
 })
 
 onBeforeMount(() => {
-    if (props.password === '3088') {
-        t.value = store.state.display.text
-        if (t.value) {
-            readyRender.value = true;
-        }
+    t.value = store.state.display.text
+    if (t.value) {
+        readyRender.value = true;
     }
 })
 
-// function handleToSignUpPage() {
-//     router.push("sign-in")
-// }
-
 function validatePasswordStartWith(rule, value) {
-    return !!model.value.password && model.value.password.startsWith(value) && model.value.password.length >= value.length;
+    return !!model.value.newPassword && model.value.newPassword.startsWith(value) && model.value.newPassword.length >= value.length;
 }
 
 function validatePasswordSame(rule, value) {
-    return value === model.value.password;
+    return value === model.value.newPassword;
 }
 
-function handleRegister(e) {
+function handleChangePassword(e) {
     e.preventDefault();
     formRef.value?.validate((errors) => {
         if (!errors) {
-            const newUser = {
-                username: model.value.username,
-                password: model.value.password
-            }
-            SkillAngolaService.createUser(newUser)
-                .then(res => {
-                    const code = res.data.code;
-                    switch (code) {
-                        case 201:
-                            message.success(t.value.SignUp.Step1.Message_success)
-                            reset();
-                            break;
-                        case 403:
-                            message.warning(t.value.SignUp.Step1.Message_warning)
-                            break;
-                        default:
-                            message.error(t.value.SignUp.Step1.Message_error)
-                            break;
-                    }
-                }).catch(err => {
-                    console.log(err)
+            const encryptedUid = localStorage.getItem("SAToken")
+            SkillAngolaService.updateUser(encryptedUid, {
+                encryptedData_frontend: encryptData({
+                    password: model.value.password,
+                    newPassword: model.value.newPassword
                 })
+            }).then(res => {
+                switch (res.data.code) {
+                    case 201:
+                        message.success(t.value.Security.UpdatePassword_message201)
+                        setTimeout(() => {
+                            logout()
+                        }, 1000);
+                        break;
+                    case 404:
+                        message.warning(t.value.Security.UpdatePassword_message404)
+                        break;
+                    default:
+                        message.error(t.value.Security.UpdatePassword_message500)
+                        break;
+                }
+            })
         } else {
             console.log(errors);
         }
-    });
+    })
 }
 
 function handlePasswordInput() {
-    if (model.value.repassword) {
+    if (model.value.reNewPassword) {
         rPasswordFormItemRef.value?.validate({ trigger: "password-input" });
     }
 }
 
-function reset() {
-    model.value.username = "";
-    model.value.password = "";
-    model.value.repassword = "";
+function handleDeleteAccount() {
+    const uid = localStorage.getItem("SAToken")
+    SkillAngolaService.deleteUser(uid).then(res => {
+        switch (res.data.code) {
+            case 200:
+                message.success(t.value.Security.DeleteUser_message200);
+                setTimeout(() => {
+                    logout()
+                }, 1000);
+                break;
+            default:
+                message.error(t.value.Security.DeleteUser_message500);
+                break;
+        }
+    })
 }
 </script>
 
 <template>
     <div v-if="readyRender" class="container">
-        <n-flex :justify="'end'">
-            <n-dropdown trigger="click" :options="languageOptions" @:select="handleSelectLanguage">
+        <n-flex :justify="'space-between'">
+            <n-button type="primary" quaternary @click="router.push({ name: 'home' })">
+                <template #icon>
+                    <n-icon>
+                        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+                            viewBox="0 0 24 24">
+                            <path d="M11.67 3.87L9.9 2.1L0 12l9.9 9.9l1.77-1.77L3.54 12z" fill="currentColor"></path>
+                        </svg>
+                    </n-icon>
+                </template>
+                {{ t.APP.NModal_NBreadCrumbItem_1 }}
+            </n-button>
+            <n-dropdown trigger="click" :options="languageOptions" @select="handleSelectLanguage">
                 <n-button round :size="'large'">
                     <template #icon>
                         <n-icon :size="24">
@@ -170,35 +170,42 @@ function reset() {
             <n-flex style="height: calc(100vh - 40px - 23px - 48px);" :align="'center'">
                 <n-flex vertical :size="48" style="margin-top: -48px">
                     <div>
-                        <div class="title" :style="{ fontSize: isMobile ? '28px' : '32px' }">{{ t.SignUp.Step1.Title }}
-                        </div>
-                        <!-- <div class="subTitle"><n-text :depth="3">{{ t.SignUp.Step1.Subtitle }}</n-text></div> -->
+                        <div class="title">{{ t.Security.Title }}</div>
                     </div>
                     <n-flex vertical style="max-width: calc(100vw - 48px); width: 360px">
                         <n-form label-placement="left" ref="formRef" :model="model" :rules="rules">
-                            <n-form-item path="username">
-                                <n-input :size="'large'" v-model:value="model.username" @keydown.enter.prevent
-                                    :placeholder="t.InputPlaceHolder_username"></n-input>
-                            </n-form-item>
                             <n-form-item path="password">
                                 <n-input type="password" :size="'large'" v-model:value="model.password"
-                                    :placeholder="t.InputPlaceHolder_password" @input="handlePasswordInput"
+                                    :placeholder="t.Security.InputPlaceHolder_password"
                                     @keydown.enter.prevent></n-input>
                             </n-form-item>
-                            <n-form-item ref="rPasswordFormItemRef" first path="repassword">
-                                <n-input type="password" :size="'large'" v-model:value="model.repassword"
-                                    :placeholder="t.SignUp.Step1.InputPlaceHolder_confirmPassword"
-                                    @keydown.enter.prevent :disabled="!model.password"></n-input>
+                            <n-form-item path="newPassword">
+                                <n-input type="password" :size="'large'" v-model:value="model.newPassword"
+                                    :placeholder="t.Security.InputPlaceHolder_newPassword" @input="handlePasswordInput"
+                                    @keydown.enter.prevent></n-input>
+                            </n-form-item>
+                            <n-form-item ref="rPasswordFormItemRef" path="reNewPassword" first>
+                                <n-input type="password" :size="'large'" v-model:value="model.reNewPassword"
+                                    :placeholder="t.Security.InputPlaceHolder_confirmNewPassword"
+                                    :disabled="!model.newPassword" @keydown.enter.prevent></n-input>
                             </n-form-item>
                         </n-form>
                         <n-flex :justify="'center'">
-                            <n-button @click="handleRegister" :size="'large'" type="primary" style="width: 100%">
-                                {{ t.SignUp.Step1.ButtonText_Next }}
+                            <n-button @click="handleChangePassword" :size="'large'" type="primary" style="width: 100%">
+                                {{ t.Security.ButtonText_Next }}
                             </n-button>
                         </n-flex>
                     </n-flex>
                 </n-flex>
             </n-flex>
+        </n-flex>
+        <n-flex :justify="'center'">
+            <n-popconfirm @positive-click="handleDeleteAccount">
+                <template #trigger>
+                    <n-button text>{{ t.Security.NButton_deleteAccount }}</n-button>
+                </template>
+                <div style="width: 240px">{{ t.Security.NPopconfirm }}</div>
+            </n-popconfirm>
         </n-flex>
     </div>
 </template>
@@ -214,6 +221,7 @@ function reset() {
     margin: 0 auto;
 
     .title {
+        font-size: 32px;
         text-align: center;
         font-weight: bold;
     }
