@@ -7,7 +7,7 @@ function setBaseURL() {
             url = 'http://localhost:5174/api';
             break;
         case 'build':
-            url = 'https://hillib.scholarhills.com/api';
+            url = 'https://www.hillib.com/api';
             break;
     }
     return url;
