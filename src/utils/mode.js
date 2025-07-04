@@ -1,4 +1,4 @@
-// const environment = 'dev';
-const environment = 'build';
+const environment = 'dev';
+// const environment = 'build';
 
 export default environment;

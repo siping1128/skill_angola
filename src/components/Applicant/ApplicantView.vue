@@ -39,6 +39,13 @@ watch(() => store.state.display.text, newVal => {
     readyRender.value = true;
 })
 
+watch(search, newVal => {
+    if (newVal) {
+        jobs.value = [];
+        page.value = 0;
+    }
+})
+
 onBeforeMount(async () => {
     await jobsGetter(page.value, "DESC")
     await recordsGetter(ApplicantId)
