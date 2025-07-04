@@ -47,7 +47,6 @@ class SkillAngolaService {
     }
 
     findAllJobsByOffset(data) {
-        console.log(encodeURIComponent(encryptData(data)))
         return http.get(`/Siping/SA/job/all?data=${encodeURIComponent(encryptData(data))}`);
     }
 
